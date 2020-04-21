@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.net.Uri;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -40,21 +39,13 @@ import static android.app.Activity.RESULT_OK;
 public class SmartLockModule extends ReactContextBaseJavaModule {
     private static final int RC_SAVE = 1;
 
-    private static final String E_EMPTY_RESULT = "E_EMPTY_RESULT";
-    private static final String E_NO_CREDENTIAL = "E_NO_CREDENTIAL";
-    private static final String E_SAVE_FAILED = "E_SAVE_FAILED";
-    private static final String E_SAVE_COULD_NOT_RESOLVE = "E_SAVE_COULD_NOT_RESOLVE";
-    private static final String E_NOT_ATTACHED = "E_NOT_ATTACHED";
-
     private final CredentialsClient mCredentialsClient;
     private final ReactApplicationContext mReactContext;
 
     SmartLockModule(ReactApplicationContext reactContext) {
         super(reactContext);
 
-        CredentialsOptions options = new CredentialsOptions.Builder()
-                .forceEnableSaveDialog()
-                .build();
+        CredentialsOptions options = new CredentialsOptions.Builder().build();
 
         this.mCredentialsClient = Credentials.getClient(reactContext, options);
         this.mReactContext = reactContext;
@@ -72,8 +63,8 @@ public class SmartLockModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void delete(ReadableMap args, Promise promise) {
-        mCredentialsClient.delete(extractCredential(args, false))
+    public void delete(String id, Promise promise) {
+        mCredentialsClient.delete(new Credential.Builder(id).build())
             .addOnCompleteListener(getOnDeleteCompleteListener(promise));
     }
 
@@ -90,7 +81,7 @@ public class SmartLockModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void save(ReadableMap args, Promise promise) {
-        mCredentialsClient.save(extractCredential(args, true))
+        mCredentialsClient.save(extractCredential(args))
             .addOnCompleteListener(getOnSaveCompleteListener(promise));
     }
 
@@ -239,19 +230,17 @@ public class SmartLockModule extends ReactContextBaseJavaModule {
     }
 
     @NonNull
-    private Credential extractCredential(@NonNull ReadableMap args, boolean passwordRequired) {
+    private Credential extractCredential(@NonNull ReadableMap args) {
         if (!args.hasKey("id")) {
             throw new Error("An id is required.");
         }
 
-        if (passwordRequired && !args.hasKey("password")) {
+        if (!args.hasKey("password")) {
             throw new Error("A password is required.");
         }
 
         final String id = args.getString("id");
-        final String password = args.hasKey("password")
-            ? args.getString("password")
-            : null;
+        final String password = args.getString("password");
         final String accountType = args.hasKey("accountType")
                 ? args.getString("accountType")
                 : null;

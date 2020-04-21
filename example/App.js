@@ -53,7 +53,7 @@ const App = () => {
   }, []);
 
   const _onDelete = useCallback(async () => {
-    const error = await SmartLock.delete({id: account.id});
+    const error = await SmartLock.delete(account.id);
 
     if (error) {
       console.error(error);

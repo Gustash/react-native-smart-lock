@@ -28,11 +28,11 @@ export default {
 
     return SmartLock.save(credentials);
   },
-  async delete(credentials) {
+  async delete(id) {
     if (Platform.OS === 'ios') {
       return;
     }
 
-    return SmartLock.delete(credentials);
+    return SmartLock.delete(id);
   },
 };
