@@ -2,6 +2,8 @@
 
 This package exposes Google Smart Lock for auto sign-in based on saved credentials.
 
+![](https://media.giphy.com/media/gk9yU1AwxQ3HsXSWOY/giphy.gif)
+
 ## Getting started
 
 `$ npm install @gustash/react-native-smart-lock --save`
