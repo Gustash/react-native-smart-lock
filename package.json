@@ -2,18 +2,30 @@
   "name": "react-native-smart-lock",
   "title": "React Native Smart Lock",
   "version": "1.0.0",
-  "description": "TODO",
+  "description": "Google Smart Lock for React Native",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/github_account/react-native-smart-lock.git",
-    "baseUrl": "https://github.com/github_account/react-native-smart-lock"
+    "url": "git+https://github.com/Gustash/react-native-smart-lock.git",
+    "baseUrl": "https://github.com/Gustash/react-native-smart-lock"
   },
   "keywords": [
-    "react-native"
+    "react-native",
+    "react-native-smart-lock",
+    "react-native-smartlock",
+    "google",
+    "smart-lock",
+    "smartlock",
+    "login",
+    "credentials",
+    "automatic",
+    "keychain",
+    "chrome",
+    "password",
+    "android"
   ],
   "author": {
     "name": "Your Name",
