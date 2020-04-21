@@ -4,17 +4,17 @@ This package exposes Google Smart Lock for auto sign-in based on saved credentia
 
 ## Getting started
 
-`$ npm install react-native-smart-lock --save`
+`$ npm install @gustash/react-native-smart-lock --save`
 
 ### Mostly automatic installation (RN < 0.60)
 
-`$ react-native link react-native-smart-lock`
+`$ react-native link @gustash/react-native-smart-lock`
 
 ## Usage
 
 ### Request Credentials
 ```javascript
-import SmartLock from 'react-native-smart-lock';
+import SmartLock from '@gustash/react-native-smart-lock';
 
 async function request() {
   // You can also send a client server id as a paramenter as well
@@ -44,7 +44,7 @@ async function request() {
 
 ### Save Credentials
 ```javascript
-import SmartLock from 'react-native-smart-lock';
+import SmartLock from '@gustash/react-native-smart-lock';
 
 async function save() {
   const credentials = {
@@ -67,7 +67,7 @@ async function save() {
 
 ### Delete Credentials
 ```javascript
-import SmartLock from 'react-native-smart-lock';
+import SmartLock from '@gustash/react-native-smart-lock';
 
 async function deleteCredential() {
   const error = await SmartLock.delete('some@email.com');
@@ -80,7 +80,7 @@ async function deleteCredential() {
 
 ### Disable Auto Sign-in
 ```javascript
-import SmartLock from 'react-native-smart-lock';
+import SmartLock from '@gustash/react-native-smart-lock';
 
 // This disables request() until a new save() is called.
 // You should call this on logout to allow the user to change accounts, for example.

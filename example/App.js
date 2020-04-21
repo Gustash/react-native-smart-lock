@@ -18,7 +18,7 @@ import {
   Image,
   View,
 } from 'react-native';
-import SmartLock from 'react-native-smart-lock';
+import SmartLock from '@gustash/react-native-smart-lock';
 
 const App = () => {
   const [account, setAccount] = useState(null);

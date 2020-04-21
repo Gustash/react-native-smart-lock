@@ -1,5 +1,5 @@
 {
-  "name": "react-native-smart-lock",
+  "name": "@gustash/react-native-smart-lock",
   "title": "React Native Smart Lock",
   "version": "1.0.0",
   "description": "Google Smart Lock for React Native",
