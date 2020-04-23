@@ -1,7 +1,7 @@
 {
   "name": "@gustash/react-native-smart-lock",
   "title": "React Native Smart Lock",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Google Smart Lock for React Native",
   "main": "index.js",
   "scripts": {
