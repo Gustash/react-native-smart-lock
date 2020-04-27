@@ -38,6 +38,7 @@ import static android.app.Activity.RESULT_OK;
 
 public class SmartLockModule extends ReactContextBaseJavaModule {
     private static final int RC_SAVE = 1;
+    private static final int RC_REQUEST = 2;
 
     private final CredentialsClient mCredentialsClient;
     private final ReactApplicationContext mReactContext;
@@ -171,11 +172,25 @@ public class SmartLockModule extends ReactContextBaseJavaModule {
     }
 
     private OnCompleteListener<CredentialRequestResponse> getOnRequestCompleteListener(final Promise promise) {
+        mReactContext.addActivityEventListener(new BaseActivityEventListener() {
+            @Override
+            public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent intent) {
+                if (requestCode == RC_REQUEST) {
+                    if (resultCode == RESULT_OK) {
+                        Credential credential = intent.getParcelableExtra(Credential.EXTRA_KEY);
+                        promise.resolve(createCredentialMap(credential));
+                    } else {
+                        promise.resolve(createErrorMap("Error: Failed to request credentials."));
+                    }
+
+                    mReactContext.removeActivityEventListener(this);
+                }
+            }
+        });
+
         return new OnCompleteListener<CredentialRequestResponse>() {
             @Override
             public void onComplete(@NonNull Task<CredentialRequestResponse> task) {
-                final WritableMap map = Arguments.createMap();
-
                 if (task.isSuccessful()) {
                     final CredentialRequestResponse result = task.getResult();
                     if (result == null) {
@@ -184,49 +199,80 @@ public class SmartLockModule extends ReactContextBaseJavaModule {
                     }
 
                     final Credential credential = result.getCredential();
+                    promise.resolve(createCredentialMap(credential));
+                    return;
+                }
 
-                    if (credential == null) {
-                        promise.resolve(createErrorMap("Error: No credentials found."));
+                final Exception e = task.getException();
+
+                if (e instanceof ResolvableApiException) {
+                    // Try to resolve the save request. This will prompt the user if
+                    // the credential is new.
+                    ResolvableApiException rae = (ResolvableApiException) e;
+                    try {
+                        final Activity activity = getCurrentActivity();
+
+                        if (activity == null) {
+                            promise.resolve(createErrorMap("Error: Not attached to an activity."));
+                            return;
+                        }
+
+                        rae.startResolutionForResult(getCurrentActivity(), RC_REQUEST);
+                    } catch (IntentSender.SendIntentException exception) {
+                        // Could not resolve the request
+                        promise.resolve(createErrorMap("Error:" + exception.getMessage()));
+                    }
+                } else {
+                    // Request has no resolution
+                    if (e == null) {
+                        promise.resolve(createErrorMap("Error: Failed requesting credentials."));
                         return;
                     }
 
-                    final String id = credential.getId();
-                    final String password = credential.getPassword();
-                    final String accountType = credential.getAccountType();
-                    final String familyName = credential.getFamilyName();
-                    final String givenName = credential.getGivenName();
-                    final List<IdToken> idTokens = credential.getIdTokens();
-                    final String name = credential.getName();
-                    final Uri profilePictureUri = credential.getProfilePictureUri();
-
-                    map.putBoolean("success", true);
-                    map.putString("id", id);
-                    map.putString("password", password);
-                    map.putString("accountType", accountType);
-                    map.putString("familyName", familyName);
-                    map.putString("givenName", givenName);
-                    map.putString("name", name);
-
-                    if (profilePictureUri != null) {
-                        map.putString("profilePictureUri", profilePictureUri.toString());
-                    }
-
-                    final WritableArray idTokensArray = new WritableNativeArray();
-                    for (IdToken token : idTokens) {
-                        WritableMap tokenMap = new WritableNativeMap();
-                        tokenMap.putString("accountType", token.getAccountType());
-                        tokenMap.putString("idToken", token.getIdToken());
-                        idTokensArray.pushMap(tokenMap);
-                    }
-
-                    map.putArray("idTokens", idTokensArray);
-                } else {
-                    map.putBoolean("success", false);
+                    promise.resolve(createErrorMap("Error: " + e.getMessage()));
                 }
-
-                promise.resolve(map);
             }
         };
+    }
+
+    private ReadableMap createCredentialMap(Credential credential) {
+        if (credential == null) {
+            return createErrorMap("Error: Could not parse credentials.");
+        }
+
+        WritableMap map = new WritableNativeMap();
+
+        final String id = credential.getId();
+        final String password = credential.getPassword();
+        final String accountType = credential.getAccountType();
+        final String familyName = credential.getFamilyName();
+        final String givenName = credential.getGivenName();
+        final List<IdToken> idTokens = credential.getIdTokens();
+        final String name = credential.getName();
+        final Uri profilePictureUri = credential.getProfilePictureUri();
+
+        map.putBoolean("success", true);
+        map.putString("id", id);
+        map.putString("password", password);
+        map.putString("accountType", accountType);
+        map.putString("familyName", familyName);
+        map.putString("givenName", givenName);
+        map.putString("name", name);
+
+        if (profilePictureUri != null) {
+            map.putString("profilePictureUri", profilePictureUri.toString());
+        }
+
+        final WritableArray idTokensArray = new WritableNativeArray();
+        for (IdToken token : idTokens) {
+            WritableMap tokenMap = new WritableNativeMap();
+            tokenMap.putString("accountType", token.getAccountType());
+            tokenMap.putString("idToken", token.getIdToken());
+            idTokensArray.pushMap(tokenMap);
+        }
+
+        map.putArray("idTokens", idTokensArray);
+        return map;
     }
 
     @NonNull
