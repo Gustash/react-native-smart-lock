@@ -8,7 +8,6 @@ import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.BaseActivityEventListener;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -27,8 +26,8 @@ import com.google.android.gms.auth.api.credentials.CredentialsClient;
 import com.google.android.gms.auth.api.credentials.CredentialsOptions;
 import com.google.android.gms.auth.api.credentials.IdToken;
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.common.api.ResolvableApiException;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
@@ -152,7 +151,7 @@ public class SmartLockModule extends ReactContextBaseJavaModule {
                 } else if (e instanceof ApiException) {
                     final ApiException apiException = (ApiException) e;
 
-                    if (apiException.getStatusCode() == Status.RESULT_CANCELED.getStatusCode()) {
+                    if (apiException.getStatusCode() == CommonStatusCodes.CANCELED) {
                         promise.resolve("canceled");
                         return;
                     }
@@ -209,6 +208,12 @@ public class SmartLockModule extends ReactContextBaseJavaModule {
                     // Try to resolve the save request. This will prompt the user if
                     // the credential is new.
                     ResolvableApiException rae = (ResolvableApiException) e;
+
+                    if (rae.getStatusCode() == CommonStatusCodes.SIGN_IN_REQUIRED) {
+                        promise.resolve(createErrorMap("Error: No saved credentials."));
+                        return;
+                    }
+
                     try {
                         final Activity activity = getCurrentActivity();
 
